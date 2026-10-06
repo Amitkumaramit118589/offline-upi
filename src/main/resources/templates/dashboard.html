@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Offline Mesh Pay — Smart Mesh Settlement</title>
+    <!-- Google Fonts for Modern Fintech Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Authentic Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        :root {
+            /* PhonePe & Paytm Inspired Color Palette */
+            --phonepe-purple: #5f259f;
+            --phonepe-purple-light: #7c3aed;
+            --phonepe-purple-dark: #3b0764;
+            --paytm-navy: #041029;
+            --paytm-navy-card: #0a1733;
+            --paytm-blue: #002970;
+            --paytm-cyan: #00baf2;
+            --paytm-cyan-glow: rgba(0, 186, 242, 0.4);
+            --upi-green: #00b956;
+            --upi-green-glow: rgba(0, 185, 86, 0.35);
+            --upi-amber: #f59e0b;
+            --upi-red: #ef4444;
+            --bg-dark: #070d1e;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-border-active: rgba(0, 186, 242, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --radius-xl: 18px;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(95, 37, 159, 0.28) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(0, 186, 242, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(4, 16, 41, 0.6) 0%, transparent 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* ---------------------------------------------------- Header Bar */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px 24px;
+            background: rgba(10, 23, 51, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px var(--paytm-cyan-glow);
+            object-fit: cover;
+            border: 1px solid rgba(0, 186, 242, 0.5);
+        }
+
+        .brand-fallback-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--phonepe-purple) 0%, var(--paytm-cyan) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+        }
+
+        .brand-titles h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ffffff 0%, #38bdf8 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            background: linear-gradient(90deg, #6366f1, #06b6d4);
+            border-radius: 20px;
+            color: #fff;
+            -webkit-text-fill-color: #fff;
+            letter-spacing: 0.8px;
+        }
+
+        .brand-titles p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 30px;
+            background: rgba(0, 186, 242, 0.1);
+            border: 1px solid rgba(0, 186, 242, 0.3);
+            color: #38bdf8;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .soundbox-btn {
+            background: rgba(95, 37, 159, 0.25);
+            border: 1px solid rgba(124, 58, 237, 0.4);
+            color: #e2e8f0;
+            border-radius: 30px;
+            padding: 7px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .soundbox-btn:hover {
+            background: rgba(95, 37, 159, 0.45);
+            border-color: #a855f7;
+            transform: translateY(-1px);
+        }
+
+        .soundbox-btn.active {
+            color: #4ade80;
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            border-radius: 30px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ---------------------------------------------------- Hero Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(10, 23, 51, 0.7);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--card-border-active);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--stat-glow, var(--paytm-cyan)), transparent);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--stat-glow, var(--paytm-cyan));
+        }
+
+        .stat-info .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-info .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* ---------------------------------------------------- Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ---------------------------------------------------- Card Styles */
+        .card {
+            background: rgba(10, 23, 51, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            padding: 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--paytm-cyan);
+            font-size: 16px;
+        }
+
+        .card-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ---------------------------------------------------- PhonePe Style Payment Box */
+        .payment-box {
+            background: linear-gradient(145deg, rgba(23, 17, 43, 0.9) 0%, rgba(13, 27, 60, 0.9) 100%);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: 0 15px 35px -10px rgba(95, 37, 159, 0.25);
+        }
+
+        .transfer-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .transfer-row {
+                grid-template-columns: 1fr;
+            }
+            .transfer-arrow {
+                transform: rotate(90deg);
+                margin: 4px auto;
+            }
+        }
+
+        .party-select-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .party-select-box:focus-within {
+            border-color: var(--paytm-cyan);
+        }
+
+        .party-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .custom-select {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .custom-select:focus {
+            border-color: var(--paytm-cyan);
+            box-shadow: 0 0 0 2px var(--paytm-cyan-glow);
+        }
+
+        .transfer-arrow {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--phonepe-purple), var(--paytm-cyan));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(0, 186, 242, 0.4);
+        }
+
+        /* Amount Input Area */
+        .amount-container {
+            background: rgba(4, 16, 41, 0.7);
+            border: 1px solid rgba(0, 186, 242, 0.2);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 14px;
+        }
+
+        .amount-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .amount-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .currency-symbol {
+            font-size: 28px;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .amount-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+        }
+
+        /* Quick Amount Chips */
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip-btn:hover {
+            background: rgba(0, 186, 242, 0.15);
+            border-color: var(--paytm-cyan);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* PIN & Origin row */
+        .pin-origin-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 500px) {
+            .pin-origin-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .styled-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .styled-input:focus {
+            border-color: var(--phonepe-purple-light);
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.4);
+        }
+
+        /* Big Pay Button */
+        .btn-pay-hero {
+            width: 100%;
+            background: linear-gradient(135deg, #5f259f 0%, #7c3aed 50%, #00baf2 100%);
+            background-size: 200% 200%;
+            animation: gradient-shift 6s ease infinite;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px -5px rgba(95, 37, 159, 0.6);
+            transition: all 0.25s ease;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-pay-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px -5px rgba(0, 186, 242, 0.6);
+        }
+
+        .btn-pay-hero:active {
+            transform: translateY(0);
+        }
+
+        .security-badge {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .security-badge i {
+            color: #10b981;
+        }
+
+        /* ---------------------------------------------------- Mesh Control Deck (Steps 2 & 3) */
+        .step-deck {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 650px) {
+            .step-deck {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-action-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .step-action-card:hover {
+            border-color: rgba(0, 186, 242, 0.3);
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .step-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .step-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--phonepe-purple);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .step-badge.cyan {
+            background: #0284c7;
+        }
+
+        .step-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .step-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        .btn-action-step {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-action-step.purple {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: rgba(124, 58, 237, 0.4);
+            color: #d8b4fe;
+        }
+
+        .btn-action-step.purple:hover {
+            background: rgba(124, 58, 237, 0.35);
+            border-color: #a855f7;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-action-step.cyan {
+            background: rgba(0, 186, 242, 0.15);
+            border-color: rgba(0, 186, 242, 0.4);
+            color: #7dd3fc;
+        }
+
+        .btn-action-step.cyan:hover {
+            background: rgba(0, 186, 242, 0.3);
+            border-color: #38bdf8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .deck-footer {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        /* ---------------------------------------------------- Digital Bank Cards (PhonePe / Paytm Style) */
+        .cards-carousel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .virtual-card {
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 155px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+
+        .virtual-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.65);
+        }
+
+        .virtual-card.card-purple {
+            background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #312e81 100%);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+        }
+
+        .virtual-card.card-blue {
+            background: linear-gradient(135deg, #0369a1 0%, #0284c7 50%, #002970 100%);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .virtual-card.card-emerald {
+            background: linear-gradient(135deg, #047857 0%, #059669 50%, #064e3b 100%);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .virtual-card.card-amber {
+            background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #78350f 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bank-badge {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: rgba(255, 255, 255, 0.85);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-chip {
+            width: 28px;
+            height: 20px;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            border-radius: 4px;
+            box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .card-chip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .card-balance-section {
+            margin: 10px 0;
+        }
+
+        .card-balance-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-balance-amt {
+            font-size: 24px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: #fff;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-bottom {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .card-holder {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .card-vpa {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.75);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-network-logo {
+            font-size: 16px;
+            font-weight: 800;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: -0.5px;
+        }
+
+        /* ---------------------------------------------------- Mesh Device Nodes */
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .device-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 186, 242, 0.3);
+        }
+
+        .device-card.bridge {
+            background: rgba(2, 44, 34, 0.4);
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .device-card.has-packets {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+            border-color: #a855f7;
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .device-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .device-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-4g {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .badge-ble {
+            background: rgba(147, 51, 234, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(147, 51, 234, 0.4);
+        }
+
+        .device-packet-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .packet-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .packet-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            background: rgba(124, 58, 237, 0.25);
+            border: 1px solid rgba(167, 139, 250, 0.4);
+            color: #e9d5ff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            animation: pulse-packet 2s infinite;
+        }
+
+        @keyframes pulse-packet {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        /* ---------------------------------------------------- Transaction Table (Paytm / PhonePe Passbook) */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .passbook-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .passbook-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .passbook-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        .passbook-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+        }
+
+        .tx-id-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--paytm-cyan);
+            font-weight: 600;
+        }
+
+        .party-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .party-arrow {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .amt-credit {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #34d399;
+            font-size: 14px;
+        }
+
+        .status-pill-table {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-SETTLED {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+
+        .status-DUPLICATE_DROPPED {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+        }
+
+        .status-REJECTED, .status-INVALID {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        .meta-cell {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ---------------------------------------------------- Activity Terminal */
+        .terminal-container {
+            background: #020617;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .t-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .t-red { background: #ef4444; }
+        .t-yellow { background: #eab308; }
+        .t-green { background: #22c55e; }
+
+        .terminal-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .terminal-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+
+        .terminal-btn:hover {
+            color: #fff;
+        }
+
+        .terminal-body {
+            height: 200px;
+            overflow-y: auto;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* ---------------------------------------------------- Floating Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--paytm-cyan);
+            border-radius: 12px;
+            padding: 12px 18px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: slide-in 0.3s ease-out;
+            pointer-events: auto;
+            max-width: 380px;
+        }
+
+        .toast.success {
+            border-color: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .toast.warning {
+            border-color: #f59e0b;
+        }
+
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="container">
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="brand-section">
+            <img src="/images/upi_mesh_logo.jpg" alt="UPI Offline Mesh" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex';" />
+            <div id="fallback-logo" class="brand-fallback-logo" style="display:none;">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="brand-titles">
+                <h1>PayMesh <span class="brand-tag">Offline 2.0</span></h1>
+                <p>Zero-Internet Offline UPI Protocol via Encrypted Bluetooth Mesh</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                <span>BLE Mesh Active</span>
+            </div>
+
+            <button class="soundbox-btn active" id="soundbox-toggle" onclick="toggleSoundbox()">
+                <i class="fa-solid fa-volume-high"></i>
+                <span id="soundbox-text">Soundbox: ON</span>
+            </button>
+
+            <button class="refresh-btn" onclick="manualRefresh()">
+                <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+                <span>Sync</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Stats Row -->
+    <div class="stats-grid">
+        <div class="stat-card" style="--stat-glow: #38bdf8;">
+            <div class="stat-icon">
+                <i class="fa-solid fa-mobile-screen"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-devices">5</div>
+                <div class="stat-label">Mesh Smartphone Nodes</div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="--stat-glow: #34d399;">
+            <div class="stat-icon">
+                <i class="fa-solid fa-tower-broadcast"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-bridges">2</div>
+                <div class="stat-label">Active 4G Bridge Gateways</div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="--stat-glow: #c084fc;">
+            <div class="stat-icon">
+                <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-packets">0</div>
+                <div class="stat-label">Packets in Mesh Transit</div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="--stat-glow: #fbbf24;">
+            <div class="stat-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-idempotency">0</div>
+                <div class="stat-label">Idempotency Keys Tracked</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="main-layout">
+        <!-- LEFT COLUMN: Payment Console & Controls -->
+        <div>
+            <!-- Step 1: Send Money (PhonePe / Paytm Style) -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Step 1: Compose Offline Payment</span>
+                    </div>
+                    <span class="card-subtext">PhonePe / Paytm Simulator</span>
+                </div>
+
+                <div class="payment-box">
+                    <div class="transfer-row">
+                        <div class="party-select-box">
+                            <div class="party-label">
+                                <i class="fa-solid fa-user"></i> Sender (From)
+                            </div>
+                            <select id="senderVpa" class="custom-select" onchange="updateAccountHighlights()">
+                                <option value="alice@demo">Alice (alice@demo)</option>
+                                <option value="bob@demo">Bob (bob@demo)</option>
+                                <option value="carol@demo">Carol (carol@demo)</option>
+                                <option value="dave@demo">Dave (dave@demo)</option>
+                            </select>
+                        </div>
+
+                        <div class="transfer-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                        <div class="party-select-box">
+                            <div class="party-label">
+                                <i class="fa-solid fa-user-check"></i> Receiver (To)
+                            </div>
+                            <select id="receiverVpa" class="custom-select">
+                                <option value="bob@demo">Bob (bob@demo)</option>
+                                <option value="carol@demo">Carol (carol@demo)</option>
+                                <option value="alice@demo">Alice (alice@demo)</option>
+                                <option value="dave@demo">Dave (dave@demo)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Amount Box -->
+                    <div class="amount-container">
+                        <div class="amount-label">Enter Transfer Amount</div>
+                        <div class="amount-input-wrapper">
+                            <span class="currency-symbol">₹</span>
+                            <input type="number" id="amount" class="amount-input" value="500" min="1" step="1">
+                        </div>
+                    </div>
+
+                    <!-- Quick Amount Chips -->
+                    <div class="quick-chips">
+                        <button class="chip-btn" onclick="setAmount(100)">+₹100</button>
+                        <button class="chip-btn" onclick="setAmount(500)">+₹500</button>
+                        <button class="chip-btn" onclick="setAmount(1000)">+₹1,000</button>
+                        <button class="chip-btn" onclick="setAmount(2000)">+₹2,000</button>
+                    </div>
+
+                    <!-- PIN & Device Selection -->
+                    <div class="pin-origin-row">
+                        <div class="input-group">
+                            <label><i class="fa-solid fa-lock"></i> UPI PIN (4-Digit)</label>
+                            <input type="password" id="pin" class="styled-input" value="1234" maxlength="4">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fa-solid fa-mobile"></i> Starting Device</label>
+                            <select id="startDevice" class="styled-input">
+                                <option value="phone-alice">phone-alice (Offline)</option>
+                                <option value="phone-bob">phone-bob (Offline)</option>
+                                <option value="phone-carol">phone-carol (Offline)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn-pay-hero" onclick="sendPacket()">
+                        <i class="fa-solid fa-shield-virus"></i>
+                        <span>Encrypt & Inject into Mesh (Offline)</span>
+                    </button>
+
+                    <div class="security-badge">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Hybrid RSA-2048 + AES-GCM-256 • Zero Internet Required</span>
+                    </div>
+                </div>
+
+                <!-- Step 2 & 3: Gossip & 4G Settlement -->
+                <div class="step-deck">
+                    <div class="step-action-card">
+                        <div class="step-top">
+                            <div class="step-badge">2</div>
+                            <div>
+                                <div class="step-title">BLE Mesh Gossip</div>
+                                <div class="step-desc">Packets hop phone-to-phone via local Bluetooth signals</div>
+                            </div>
+                        </div>
+                        <button class="btn-action-step purple" onclick="gossip()">
+                            <i class="fa-brands fa-bluetooth-b"></i>
+                            <span>Run BLE Gossip Round</span>
+                        </button>
+                    </div>
+
+                    <div class="step-action-card">
+                        <div class="step-top">
+                            <div class="step-badge cyan">3</div>
+                            <div>
+                                <div class="step-title">4G Cloud Gateway</div>
+                                <div class="step-desc">Bridge nodes walk outside and upload packets concurrently</div>
+                            </div>
+                        </div>
+                        <button class="btn-action-step cyan" onclick="flushBridges()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Settle via 4G Gateways</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="deck-footer">
+                    <button class="btn-reset" onclick="resetMesh()">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Reset Mesh & Cache</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cryptographic Terminal Log -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Cryptographic Mesh Audit Log</span>
+                    </div>
+                    <span class="card-subtext" id="cacheInfo">Idempotency cache: 0</span>
+                </div>
+
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="t-dot t-red"></span>
+                            <span class="t-dot t-yellow"></span>
+                            <span class="t-dot t-green"></span>
+                        </div>
+                        <div class="terminal-title">mesh-core-daemon.log</div>
+                        <button class="terminal-btn" onclick="clearLog()">Clear</button>
+                    </div>
+                    <div class="terminal-body" id="log"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Bank Accounts, Devices & Passbook -->
+        <div>
+            <!-- Bank Accounts (Paytm Bank / PhonePe Style Cards) -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>Bank Accounts & Wallets</span>
+                    </div>
+                    <span class="card-subtext">Click card to select sender</span>
+                </div>
+
+                <div class="cards-carousel" id="account-cards">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Active Mesh Nodes -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-network-wired"></i>
+                        <span>Bluetooth Mesh Topology</span>
+                    </div>
+                    <span class="card-subtext">Hop network status</span>
+                </div>
+
+                <div class="devices-grid" id="devices">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Transaction Passbook -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>UPI Transaction Passbook</span>
+                    </div>
+                    <span class="card-subtext">Settlement ledger</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="passbook-table" id="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Txn Ref</th>
+                                <th>Transfer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Gateway</th>
+                                <th>Hops</th>
+                                <th>Settled</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+            </div>
+
+            <!-- Developer Credit Footer -->
+            <footer style="margin-top: 30px; padding: 18px 24px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary);">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--upi-green);"></i>
+                    <span>Offline UPI Mesh Payment System • End-to-End Encrypted</span>
+                </div>
+                <div style="color: var(--text-secondary);">
+                    <span>Engineered by <strong style="color: #fff;">Amit Kumar</strong> (<a href="https://github.com/Amitkumaramit118589" target="_blank" style="color: var(--paytm-cyan); text-decoration: none; font-weight: 600;">@Amitkumaramit118589</a>)</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<script>
+// Soundbox Audio Synthesizer (Paytm / PhonePe Style Soundbox chime)
+let soundboxEnabled = true;
+let audioCtx = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+function playTone(freq, type, duration, delay = 0) {
+    if (!soundboxEnabled) return;
+    try {
+        const ctx = getAudioContext();
+        setTimeout(() => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+        }, delay);
+    } catch (e) {
+        console.warn('Audio not available', e);
+    }
+}
+
+// Payment Injection Tone
+function playInjectSound() {
+    playTone(523.25, 'sine', 0.15, 0);   // C5
+    playTone(659.25, 'sine', 0.25, 100); // E5
+}
+
+// Gossip Hop Tone
+function playGossipSound() {
+    playTone(880, 'sine', 0.1, 0);       // A5
+}
+
+// Paytm / PhonePe Style Success Chime!
+function playSettledSound() {
+    playTone(523.25, 'triangle', 0.18, 0);   // C5
+    playTone(659.25, 'triangle', 0.18, 120); // E5
+    playTone(783.99, 'triangle', 0.18, 240); // G5
+    playTone(1046.50, 'sine', 0.45, 360);    // C6
+}
+
+function toggleSoundbox() {
+    soundboxEnabled = !soundboxEnabled;
+    const btn = document.getElementById('soundbox-toggle');
+    const txt = document.getElementById('soundbox-text');
+    if (soundboxEnabled) {
+        btn.classList.add('active');
+        txt.textContent = 'Soundbox: ON';
+        showToast('🔊 Paytm/PhonePe Soundbox voice chime enabled!', 'success');
+        playSettledSound();
+    } else {
+        btn.classList.remove('active');
+        txt.textContent = 'Soundbox: MUTED';
+        showToast('🔇 Soundbox muted', 'warning');
+    }
+}
+
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = '<i class="fa-solid fa-info-circle"></i>';
+    if (type === 'success') icon = '<i class="fa-solid fa-circle-check" style="color:#22c55e;"></i>';
+    if (type === 'warning') icon = '<i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i>';
+    
+    toast.innerHTML = `${icon} <span>${msg}</span>`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+function log(msg) {
+    const el = document.getElementById('log');
+    const time = new Date().toLocaleTimeString();
+    el.textContent = `[${time}] ${msg}\n` + el.textContent;
+}
+
+function clearLog() {
+    document.getElementById('log').textContent = '';
+}
+
+function setAmount(val) {
+    document.getElementById('amount').value = val;
+}
+
+const cardColorMap = {
+    'alice@demo': { class: 'card-purple', bank: 'HDFC PAYMENTS' },
+    'bob@demo': { class: 'card-blue', bank: 'PAYTM PAYMENTS BANK' },
+    'carol@demo': { class: 'card-emerald', bank: 'STATE BANK OF INDIA' },
+    'dave@demo': { class: 'card-amber', bank: 'ICICI BANK' }
+};
+
+function selectSenderCard(vpa) {
+    const select = document.getElementById('senderVpa');
+    select.value = vpa;
+    showToast(`Selected ${vpa} as sender`, 'info');
+}
+
+let lastTxCount = 0;
+
+async function refresh() {
+    try {
+        // 1. Mesh State
+        const m = await fetch('/api/mesh/state').then(r => r.json());
+        
+        let totalPacketsInMesh = 0;
+        let onlineBridges = 0;
+        
+        const devicesDiv = document.getElementById('devices');
+        devicesDiv.innerHTML = m.devices.map(d => {
+            totalPacketsInMesh += d.packetCount;
+            if (d.hasInternet) onlineBridges++;
+            
+            const hasPackets = d.packetCount > 0;
+            return `
+                <div class="device-card ${d.hasInternet ? 'bridge' : ''} ${hasPackets ? 'has-packets' : ''}">
+                    <div class="device-header">
+                        <div class="device-name">
+                            <i class="fa-solid ${d.hasInternet ? 'fa-tower-broadcast' : 'fa-mobile-screen'}"></i>
+                            ${d.deviceId}
+                        </div>
+                        <span class="device-badge ${d.hasInternet ? 'badge-4g' : 'badge-ble'}">
+                            ${d.hasInternet ? '<i class="fa-solid fa-wifi"></i> 4G' : '<i class="fa-brands fa-bluetooth-b"></i> BLE'}
+                        </span>
+                    </div>
+                    <div class="device-packet-count">
+                        <i class="fa-solid fa-box"></i> Holding: <strong>${d.packetCount}</strong> packet(s)
+                    </div>
+                    <div class="packet-tags">
+                        ${d.packetIds.map(id => `<span class="packet-pill">#${id}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Update Hero Stats
+        document.getElementById('stat-devices').textContent = m.devices.length;
+        document.getElementById('stat-bridges').textContent = onlineBridges;
+        document.getElementById('stat-packets').textContent = totalPacketsInMesh;
+        document.getElementById('stat-idempotency').textContent = m.idempotencyCacheSize;
+        document.getElementById('cacheInfo').textContent = `Idempotency cache entries: ${m.idempotencyCacheSize}`;
+
+        // 2. Accounts
+        const accs = await fetch('/api/accounts').then(r => r.json());
+        const cardsContainer = document.getElementById('account-cards');
+        cardsContainer.innerHTML = accs.map(a => {
+            const conf = cardColorMap[a.vpa] || { class: 'card-blue', bank: 'UPI BANK' };
+            return `
+                <div class="virtual-card ${conf.class}" onclick="selectSenderCard('${a.vpa}')" title="Click to select as sender">
+                    <div class="card-top">
+                        <span class="bank-badge"><i class="fa-solid fa-building-columns"></i> ${conf.bank}</span>
+                        <div class="card-chip"></div>
+                    </div>
+                    <div class="card-balance-section">
+                        <div class="card-balance-label">Available Balance</div>
+                        <div class="card-balance-amt">₹${parseFloat(a.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div class="card-bottom">
+                        <div>
+                            <div class="card-holder">${a.holderName}</div>
+                            <div class="card-vpa">${a.vpa}</div>
+                        </div>
+                        <div class="card-network-logo">UPI 2.0</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 3. Transactions
+        const txs = await fetch('/api/transactions').then(r => r.json());
+        
+        // Sound check if new transaction settled
+        if (txs.length > lastTxCount && lastTxCount !== 0) {
+            playSettledSound();
+        }
+        lastTxCount = txs.length;
+
+        const txTableBody = document.querySelector('#tx-table tbody');
+        if (txs.length === 0) {
+            txTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-muted);">No transactions yet. Compose payment in Step 1 to begin.</td></tr>`;
+        } else {
+            txTableBody.innerHTML = txs.map(t => `
+                <tr>
+                    <td class="tx-id-badge">#TX-${t.id}</td>
+                    <td>
+                        <div class="party-cell">
+                            <span>${t.senderVpa.split('@')[0]}</span>
+                            <span class="party-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                            <span>${t.receiverVpa.split('@')[0]}</span>
+                        </div>
+                    </td>
+                    <td class="amt-credit">+₹${parseFloat(t.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                    <td>
+                        <span class="status-pill-table status-${t.status}">
+                            <i class="fa-solid ${t.status === 'SETTLED' ? 'fa-check' : 'fa-xmark'}"></i>
+                            ${t.status}
+                        </span>
+                    </td>
+                    <td class="meta-cell"><i class="fa-solid fa-tower-cell"></i> ${t.bridgeNodeId}</td>
+                    <td class="meta-cell"><span class="packet-pill">${t.hopCount} hop(s)</span></td>
+                    <td class="meta-cell">${new Date(t.settledAt).toLocaleTimeString()}</td>
+                </tr>
+            `).join('');
+        }
+
+    } catch (err) {
+        console.error('Refresh error', err);
+    }
+}
+
+async function sendPacket() {
+    const sender = document.getElementById('senderVpa').value;
+    const receiver = document.getElementById('receiverVpa').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const pin = document.getElementById('pin').value;
+    const startDevice = document.getElementById('startDevice').value;
+
+    if (sender === receiver) {
+        showToast('Sender and receiver cannot be the same account!', 'warning');
+        return;
+    }
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount!', 'warning');
+        return;
+    }
+
+    const body = {
+        senderVpa: sender,
+        receiverVpa: receiver,
+        amount: amount,
+        pin: pin,
+        ttl: 5,
+        startDevice: startDevice
+    };
+
+    try {
+        const r = await fetch('/api/demo/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        }).then(res => res.json());
+
+        playInjectSound();
+        log(`🔐 [ENCRYPTED] Payment ₹${amount} (${sender} ➔ ${receiver}) created.`);
+        log(`   Packet ID: ${r.packetId.substring(0,8)} | Injected at: ${r.injectedAt} (TTL: ${r.ttl})`);
+        log(`   Ciphertext: ${r.ciphertextPreview}`);
+
+        showToast(`₹${amount} encrypted and injected into ${startDevice} (Offline)!`, 'success');
+        refresh();
+    } catch (e) {
+        showToast('Failed to inject payment: ' + e.message, 'warning');
+    }
+}
+
+async function gossip() {
+    try {
+        const r = await fetch('/api/mesh/gossip', {method: 'POST'}).then(res => res.json());
+        playGossipSound();
+        log(`🔄 [GOSSIP ROUND] Transferred ${r.transfers} packet(s) across mesh.`);
+        log(`   Node holding stats: ${JSON.stringify(r.deviceCounts)}`);
+        showToast(`BLE Gossip complete: ${r.transfers} packet hop(s) made!`, 'info');
+        refresh();
+    } catch (e) {
+        showToast('Gossip failed: ' + e.message, 'warning');
+    }
+}
+
+async function flushBridges() {
+    try {
+        const r = await fetch('/api/mesh/flush', {method: 'POST'}).then(res => res.json());
+        log(`⚡ [4G GATEWAY] ${r.uploadsAttempted} upload(s) delivered to settlement core:`);
+        
+        let settledCount = 0;
+        let dupCount = 0;
+
+        r.results.forEach(res => {
+            log(`   ↳ Gateway [${res.bridgeNode}] Packet #${res.packetId} ➔ Outcome: ${res.outcome} ${res.reason ? '(' + res.reason + ')' : ''}`);
+            if (res.outcome === 'SETTLED') settledCount++;
+            if (res.outcome === 'DUPLICATE_DROPPED') dupCount++;
+        });
+
+        if (settledCount > 0) {
+            playSettledSound();
+            showToast(`🎉 ₹ Settled ${settledCount} transaction(s) via 4G Gateway!`, 'success');
+        } else if (dupCount > 0) {
+            showToast(`🛡️ ${dupCount} duplicate packet(s) dropped safely (Idempotency intact)!`, 'warning');
+        } else {
+            showToast('No pending packets held by 4G bridge nodes to upload.', 'info');
+        }
+
+        refresh();
+    } catch (e) {
+        showToast('Gateway upload failed: ' + e.message, 'warning');
+    }
+}
+
+async function resetMesh() {
+    try {
+        await fetch('/api/mesh/reset', {method: 'POST'});
+        log('🗑️ [RESET] Virtual mesh state and idempotency cache cleared.');
+        showToast('Mesh reset to clean initial state', 'info');
+        refresh();
+    } catch (e) {
+        showToast('Reset failed: ' + e.message, 'warning');
+    }
+}
+
+function manualRefresh() {
+    const icon = document.getElementById('refresh-icon');
+    icon.classList.add('spinning');
+    refresh().finally(() => {
+        setTimeout(() => icon.classList.remove('spinning'), 600);
+    });
+}
+
+// Initial load & Polling
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>
